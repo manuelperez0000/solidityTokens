@@ -53,7 +53,7 @@ contract nftToken721 is ERC165, IERC721{
     }
 
     function approve(address to, uint256 tokenId) public virtual override{
-        address owner ownerOf(tokenId);
+        address owner = ownerOf(tokenId);
         require(to != owner, "ERROR: Owner have permission");
         require(msg.sender == owner || isApprovedForAll(owner, msg.sender), "ERROR: You are not the owner or dont have permissions" );
         _approve(to, tokenId);
@@ -69,7 +69,7 @@ contract nftToken721 is ERC165, IERC721{
     }
 
     function _safeMint(address to, uint256 tokenId) public {
-        _safemint(to,tokenId, "");
+        _safeMint(to,tokenId, "");
     }
 
     function _safeMint(address to, uint256 tokenId,bytes memory _data) public{
