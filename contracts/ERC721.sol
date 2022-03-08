@@ -64,8 +64,51 @@ contract nftToken721 is ERC165, IERC721{
         emit Approval(ownerOf(tokenId), to, tokenId);
     }
 
-    function isApprovedForAll(address owner, address operator ) external view returns(bool){
+    function getApproved(uint256 tokenId) public view virtual override returns(address){
+        require(_exist(tokenId),"ERROR: Token did no exist");
+        return _tokenApprovals[tokenId];
+    }  
+
+    function setApprovalForAll(address operator, bool approved) public virtual override {
+        require(operator != msg.sender,"ERROR: Operator address muts by diferent");
+
+        _operatorApprovals[msg.sender][operator] = approved;
+        emit ApprovalForAll(msg.sender, operator, approved);
+    }
+
+    function isApprovedForAll(address owner, address operator )public view virtual override returns(bool){
         return _operatorApprovals[owner][operator];
+    }
+
+    function transferFrom(address from,address to,uint256 tokenId) public virtual override{
+        require(_isApprovedOrOwner(msg.sender, tokenId), "ERROR: You are not owner or you don have permissions");
+        _transfer(from,to,tokenId);
+    }
+
+    function _transfer(address from, address to, uint256 tokenId )internal virtual{
+        require(ownerOf(tokenId) == from, "ERROR: Token id do not exist");
+        require(to != address(0), "ERROR: No transfer to zero address" );
+
+        _approve(address(0), tokenId);
+        _balances[from] -= 1;
+        _balances[to] += 1;
+        _owners[tokenId] = to;
+
+        emit Transfer(from, to, tokenId);
+    }
+
+    function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override{
+        safeTransferFrom(from,to,tokenId,"");
+    }
+
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public virtual override {
+        require(_isApprovedOrOwner(msg.sender ,tokenId), "ERROR: you dont have permisions");
+        _safeTransfer(from, to, tokenId, _data);
+    }
+
+    function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data)internal virtual {
+        _transfer(from, to, tokenId);
+        require(_checkOnERC721Reveiver(from, to ,tokenId, _data),"ERROR: ERC721Reveiver not implemented" );
     }
 
     function _safeMint(address to, uint256 tokenId) public {
@@ -116,7 +159,9 @@ contract nftToken721 is ERC165, IERC721{
         return _owners[tokenId] != address(0);
     }
 
-    
-
-    
+    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns(bool){
+        require(_exist(tokenId),"ERROR: token id not exist");
+        address owner = ownerOf(tokenId);
+        return ( spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender));
+    }
 }
