@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-
-contract ccanToken {
+contract ERC721 {
     string public symbol;
     string public name;
     uint8 public decimals;
@@ -14,10 +13,10 @@ contract ccanToken {
     event Approval(address indexed owner, address indexed spender, uint value);
 
     constructor (){
-        name = "Ccan Token";
-        symbol = "CCAN";
+        name = "Token Name";
+        symbol = "Token Symbol";
         decimals = 18;
-        totalSupply = 10*10**decimals;
+        totalSupply = 10000000*10**decimals;
     }
     
     function transfer(address _to, uint _value) public returns (bool success) {
@@ -44,10 +43,17 @@ contract ccanToken {
         return true;
     }
 
-}
+    //optional mint
+    function mint(uint amount) external {
+        balanceOf[msg.sender] += amount;
+        totalSupply += amount;
+        emit Transfer(address(0), msg.sender, amount);
+    }
+    //optional burn
+    function burn(uint amount) external {
+        balanceOf[msg.sender] -= amount;
+        totalSupply -= amount;
+        emit Transfer(msg.sender, address(0), amount);
+    }
 
-Metadata of "ccantoken" was published successfully.
-contracts/ccanToken.sol : 
-dweb:/ipfs/QmNsNXPzkhLZqWyhMFaz3nBLtu1u4gV2knshW7wbY2kkBm
-metadata.json : 
-dweb:/ipfs/QmfBCc14XYBwu4sLkK23mVQovuKjc7ZCatoP6MNquTVh1P
+}
